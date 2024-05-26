@@ -12,19 +12,19 @@ Saisissez les tâches, les ressources humaines et les outils pour voir comment o
 
 # Saisie des tâches
 st.header("Saisie des Tâches")
-task_rows = st.number_input("Nombre de Tâches", min_value=1, value=1, step=1)
+task_rows = st.number_input("Nombre de Tâches", min_value=1, value=3, step=1)
 tasks_input = [st.text_input(f"Tâche {i+1}", key=f"task_input_{i}") for i in range(task_rows)]
 tasks_duration = {task: st.number_input(f"Durée de {task} (heures)", min_value=1, key=f"task_duration_{i}_{task}") for i, task in enumerate(tasks_input)}
 
 # Saisie des ressources humaines
 st.header("Saisie des Ressources Humaines")
-resource_rows = st.number_input("Nombre de Ressources Humaines", min_value=1, value=1, step=1)
+resource_rows = st.number_input("Nombre de Ressources Humaines", min_value=1, value=2, step=1)
 resources_input = [st.text_input(f"Ressource Humaine {i+1}", key=f"resource_input_{i}") for i in range(resource_rows)]
 resources_availability = {res: st.number_input(f"Disponibilité de {res} (heures)", min_value=1, key=f"resource_availability_{i}") for i, res in enumerate(resources_input)}
 
 # Saisie des outillages
 st.header("Saisie des Outillages")
-tool_rows = st.number_input("Nombre d'Outillages", min_value=1, value=1, step=1)
+tool_rows = st.number_input("Nombre d'Outillages", min_value=1, value=2, step=1)
 tools_input = [st.text_input(f"Outillage {i+1}", key=f"tool_input_{i}") for i in range(tool_rows)]
 tools_availability = {tool: st.number_input(f"Disponibilité de {tool} (heures)", min_value=1, key=f"tool_availability_{i}") for i, tool in enumerate(tools_input)}
 
@@ -48,7 +48,7 @@ if st.button("Optimiser"):
         x = LpVariable.dicts("assignement", ((i, j) for i in tasks_input for j in resources_input), 0, 1, cat='Binary')
 
         # Fonction objectif: maximiser le nombre de tâches complétées
-        prob += lpSum(x[i, j] * task_priority[i] for i in tasks_input for j in resources_input), "Nombre_de_taches_completees"
+        prob += lpSum(x[i, j] * task_priority[f"{i}_{tasks_input.index(i)}"] for i in tasks_input for j in resources_input), "Nombre_de_taches_completees"
 
         # Contraintes: chaque tâche doit être assignée à un RH
         for i in tasks_input:
@@ -59,6 +59,7 @@ if st.button("Optimiser"):
             prob += lpSum(x[i, j] * tasks_duration[i] for i in tasks_input) <= resources_availability[j], f"Disponibilite_RH_{j}"
 
         # Contraintes: respect des disponibilités des outillages
+        # Assuming each tool is needed for each task; adjust as necessary for your model
         for o in tools_input:
             prob += lpSum(x[i, j] for i in tasks_input for j in resources_input) <= tools_availability[o], f"Disponibilite_outillage_{o}"
 
