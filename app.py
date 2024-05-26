@@ -20,13 +20,13 @@ tasks_duration = {task: st.number_input(f"Durée de {task} (heures)", min_value=
 st.header("Saisie des Ressources Humaines")
 resource_rows = st.number_input("Nombre de Ressources Humaines", min_value=1, value=2, step=1)
 resources_input = [st.text_input(f"Ressource Humaine {i+1}", key=f"resource_input_{i}") for i in range(resource_rows)]
-resources_availability = {res: st.number_input(f"Disponibilité de {res} (heures)", min_value=1, key=f"resource_availability_{i}") for i, res in enumerate(resources_input)}
+resources_availability = {res: st.number_input(f"Disponibilité de {res} (heures)", min_value=1, key=f"resource_availability_{i}_{res}") for i, res in enumerate(resources_input)}
 
 # Saisie des outillages
 st.header("Saisie des Outillages")
 tool_rows = st.number_input("Nombre d'Outillages", min_value=1, value=2, step=1)
 tools_input = [st.text_input(f"Outillage {i+1}", key=f"tool_input_{i}") for i in range(tool_rows)]
-tools_availability = {tool: st.number_input(f"Disponibilité de {tool} (heures)", min_value=1, key=f"tool_availability_{i}") for i, tool in enumerate(tools_input)}
+tools_availability = {tool: st.number_input(f"Disponibilité de {tool} (heures)", min_value=1, key=f"tool_availability_{i}_{tool}") for i, tool in enumerate(tools_input)}
 
 # Tâches et dépendances
 st.header("Dépendances des Tâches")
@@ -36,7 +36,7 @@ for i, task in enumerate(tasks_input):
 
 # Priorité des tâches
 st.header("Priorité des Tâches")
-task_priority = {f"{task}_{i}": st.slider(f"Priorité de {task}", min_value=1, max_value=10, value=5, key=f"priority_{task}_{i}") for i, task in enumerate(tasks_input)}
+task_priority = {task: st.slider(f"Priorité de {task}", min_value=1, max_value=10, value=5, key=f"priority_{i}_{task}") for i, task in enumerate(tasks_input)}
 
 # Bouton pour lancer l'optimisation
 if st.button("Optimiser"):
@@ -47,8 +47,8 @@ if st.button("Optimiser"):
         # Variables de décision: x[i][j] = 1 si la tâche i est assignée à RH j, 0 sinon
         x = LpVariable.dicts("assignement", ((i, j) for i in tasks_input for j in resources_input), 0, 1, cat='Binary')
 
-        # Fonction objectif: maximiser le nombre de tâches complétées
-        prob += lpSum(x[i, j] * task_priority[f"{i}_{tasks_input.index(i)}"] for i in tasks_input for j in resources_input), "Nombre_de_taches_completees"
+        # Fonction objectif: maximiser la priorité totale des tâches complétées
+        prob += lpSum(x[i, j] * task_priority[i] for i in tasks_input for j in resources_input), "Priorite_totale"
 
         # Contraintes: chaque tâche doit être assignée à un RH
         for i in tasks_input:
@@ -59,7 +59,6 @@ if st.button("Optimiser"):
             prob += lpSum(x[i, j] * tasks_duration[i] for i in tasks_input) <= resources_availability[j], f"Disponibilite_RH_{j}"
 
         # Contraintes: respect des disponibilités des outillages
-        # Assuming each tool is needed for each task; adjust as necessary for your model
         for o in tools_input:
             prob += lpSum(x[i, j] for i in tasks_input for j in resources_input) <= tools_availability[o], f"Disponibilite_outillage_{o}"
 
@@ -103,6 +102,6 @@ if st.button("Optimiser"):
             st.plotly_chart(fig)
         else:
             st.write("Aucune donnée disponible pour afficher le diagramme de Gantt.")
-            
+
     except Exception as e:
         st.error(f"Une erreur s'est produite: {str(e)}")
