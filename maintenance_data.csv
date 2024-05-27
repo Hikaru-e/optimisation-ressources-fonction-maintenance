@@ -1,0 +1,9 @@
+Tâche,Durée,Ressource Humaine,Disponibilité,Outillage,Disponibilité des outils,Dépendances,Priorité
+Inspect Machine A,2,Technician 1,8,Wrench,10,,8
+Inspect Machine A,2,Technician 2,6,Wrench,10,,8
+Repair Conveyor Belt,4,Technician 1,8,Screwdriver,8,,7
+Repair Conveyor Belt,4,Technician 2,6,Screwdriver,8,,7
+Replace Filter in HVAC,3,Technician 1,8,Calibration Kit,5,Inspect Machine A,5
+Replace Filter in HVAC,3,Technician 2,6,Calibration Kit,5,Inspect Machine A,5
+Calibrate Sensors,5,Technician 1,8,Wrench,10,Inspect Machine A,9
+Calibrate Sensors,5,Technician 2,6,Wrench,10,Inspect Machine A,9

@@ -1,0 +1,5 @@
+Tâche,Durée,Dépendances,Priorité
+Inspect Machine A,2,,8
+Repair Conveyor Belt,4,,7
+Replace Filter in HVAC,3,Inspect Machine A,5
+Calibrate Sensors,5,Inspect Machine A,9
